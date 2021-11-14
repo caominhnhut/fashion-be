@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fashion.fashionbe.factory.CommonUtility;
 import com.fashion.fashionbe.factory.TokenHelper;
 import com.fashion.fashionbe.service.UserDetailService;
 
@@ -24,10 +25,8 @@ import com.fashion.fashionbe.service.UserDetailService;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private CommonUtility commonUtility;
 
     @Autowired
     private UserDetailService userDetailsService;
@@ -49,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         // configure AuthenticationManager so that it knows from where to load
         // user for matching credentials
         // Use BCryptPasswordEncoder
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService).passwordEncoder(commonUtility.passwordEncoder());
     }
 
     @Override
@@ -69,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                         "/swagger-resources/**",
                         "/swagger-ui.html",
                         "/v2/api-docs",
-                        "/authenticate",
+                        "/authenticate/**",
                         "/no-auth/**")
                 .permitAll()
                 .anyRequest().authenticated().and() // all other requests need to be authenticated
@@ -80,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     public void configure(WebSecurity web) throws Exception{
-        web.ignoring().antMatchers(HttpMethod.POST, "/authenticate", "/no-auth/**");
+        web.ignoring().antMatchers(HttpMethod.POST, "/authenticate/**", "/no-auth/**");
         web.ignoring().antMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "/favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js", "/assets/**");
     }
 }
