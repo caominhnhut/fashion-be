@@ -48,7 +48,7 @@ public class AccountController{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
         }
 
-        com.fashion.fashionbe.model.Account accountModel = AccountMapper.mapToModel(accountDto);
+        com.fashion.fashionbe.model.Account accountModel = AccountMapper.mapToModel.apply(accountDto);
 
         Long id = accountService.create(accountModel);
 
