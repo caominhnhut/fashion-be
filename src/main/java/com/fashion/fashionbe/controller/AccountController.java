@@ -58,8 +58,6 @@ public class AccountController{
         return ResponseEntity.status(HttpStatus.CREATED).body(accountId);
     }
 
-
-
     private void validate(Account account) throws ValidationException{
 
         isNotEmpty(account.getUserName(), FieldName.userName);
