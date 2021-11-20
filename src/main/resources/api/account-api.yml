@@ -110,7 +110,15 @@ components:
           description: The password.
           example: 'abc123'
           type: string
+        role:
+          $ref: '#/components/schemas/Role'
 
+    Role:
+      description: Role of user.
+      enum:
+        - ROLE_CUSTOMER
+        - ROLE_EMPLOYEE
+        - ROLE_ADMIN
 
     AccountId:
       description: The identification of an account.

@@ -12,9 +12,9 @@ import com.fashion.fashionbe.exception.ValidationException;
 import com.fashion.fashionbe.factory.mapper.AccountMapper;
 import com.fashion.fashionbe.service.AccountService;
 
-import om.fashion.fashionbe.dto.Account;
-import om.fashion.fashionbe.dto.AccountId;
-import om.fashion.fashionbe.dto.Problem;
+import com.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.dto.AccountId;
+import com.fashion.fashionbe.dto.Problem;
 
 /*
     FE ----> DTO(Account) BE (Controller)
@@ -58,11 +58,15 @@ public class AccountController{
         return ResponseEntity.status(HttpStatus.CREATED).body(accountId);
     }
 
+
+
     private void validate(Account account) throws ValidationException{
 
         isNotEmpty(account.getUserName(), FieldName.userName);
 
         isNotEmpty(account.getPassword(), FieldName.password);
+
+        isNotEmpty(account.getPassword(), FieldName.role);
 
     }
 

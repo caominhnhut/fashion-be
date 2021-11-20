@@ -3,7 +3,8 @@ package com.fashion.fashionbe.enumeration;
 public enum FieldName{
 
     userName("The username should not be empty"),
-    password("The password should not be empty");
+    password("The password should not be empty"),
+    role("The role of user should not be empty");
 
     private String message;
 

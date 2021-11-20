@@ -4,7 +4,9 @@ import java.util.function.Function;
 
 import com.fashion.fashionbe.entity.UserEntity;
 
-import om.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.enumeration.AuthorityName;
+import com.fashion.fashionbe.model.Authority;
 
 public class AccountMapper{
 
@@ -17,16 +19,21 @@ public class AccountMapper{
         com.fashion.fashionbe.model.Account model = new com.fashion.fashionbe.model.Account();
         model.setUserName(dto.getUserName());
         model.setPassword(dto.getPassword());
+        Authority authority = new Authority();
+        authority.setAuthorityName(AuthorityName.valueOf(dto.getRole().toString()));
+        model.getAuthorities().add(authority);
 
         return model;
     };
 
-    public static UserEntity mapToEntity(com.fashion.fashionbe.model.Account account){
-
+    public  static Function<com.fashion.fashionbe.model.Account,UserEntity> mapToEntity = account -> {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(account.getUserName());
         userEntity.setPassword(account.getPassword());
+        userEntity.setAuthorities(AuthorityMapper.mapToEntity.apply(account.getAuthorities()));
 
         return userEntity;
-    }
+    };
+
+
 }

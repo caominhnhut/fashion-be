@@ -83,7 +83,7 @@
                             <inputSpec>${project.basedir}/src/main/resources/api/account-api.yml</inputSpec>
                             <generatorName>jaxrs-spec</generatorName>
                             <apiPackage>com.fashion.fashionbe.dto</apiPackage>
-                            <modelPackage>om.fashion.fashionbe.dto</modelPackage>
+                            <modelPackage>com.fashion.fashionbe.dto</modelPackage>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateModels>true</generateModels>

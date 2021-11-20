@@ -1,5 +1,6 @@
 package com.fashion.fashionbe.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,13 @@ public class AccountServiceImpl implements AccountService{
     @Override
     public Long create(Account account){
 
-        UserEntity userEntity = AccountMapper.mapToEntity(account);
+        UserEntity userEntity = AccountMapper.mapToEntity.apply(account);
+        List<Authority> authorities = new ArrayList<>();
+        for(com.fashion.fashionbe.model.Authority role : account.getAuthorities()){
+            List<Authority> authorities1 = authorityRepository.findByName(role.getAuthorityName());
+            authorities.addAll(authorities1);
+        }
 
-        List<Authority> authorities = authorityRepository.findByName(AuthorityName.ROLE_CUSTOMER);
         if(authorities.isEmpty()){
             throw new IllegalArgumentException(String.format("The role [%s] not found", AuthorityName.ROLE_CUSTOMER.name()));
         }
