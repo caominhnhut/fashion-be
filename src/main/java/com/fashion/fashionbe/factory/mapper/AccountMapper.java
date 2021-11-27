@@ -4,36 +4,26 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fashion.fashionbe.entity.UserEntity;
-
 import com.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.dto.Role;
+import com.fashion.fashionbe.entity.UserEntity;
 import com.fashion.fashionbe.enumeration.AuthorityName;
 import com.fashion.fashionbe.model.Authority;
 
 public class AccountMapper{
 
-    private AccountMapper(){
-        // hide constructor
-    }
+    private static Function<List<Role>, List<Authority>> mapToAuthorityList = roles -> roles.stream().map(role -> {
+        Authority authority = new Authority();
+        authority.setAuthorityName(AuthorityName.valueOf(role.toString()));
+        return authority;
+    }).collect(Collectors.toList());
 
-    public static Function<Account, com.fashion.fashionbe.model.Account> mapToModel = dto -> {
+    public static final Function<Account, com.fashion.fashionbe.model.Account> mapToModel = dto -> {
 
-        /*
-        DTO
-        {
-          "userName": "addmin@gmail.com",
-          "password": "123abc",
-          "role": "ROLE_ADMIN"
-        }
-         */
         com.fashion.fashionbe.model.Account model = new com.fashion.fashionbe.model.Account();
         model.setUserName(dto.getUserName());
         model.setPassword(dto.getPassword());
-
-        Authority authority = new Authority();
-        authority.setAuthorityName(AuthorityName.valueOf(dto.getRole().toString()));
-        model.getAuthorities().add(authority);
-
+        model.getAuthorities().addAll(mapToAuthorityList.apply(dto.getRoles()));
         return model;
     };
 
@@ -43,7 +33,7 @@ public class AccountMapper{
         return authorityEntity;
     }).collect(Collectors.toList());
 
-    public static Function<com.fashion.fashionbe.model.Account, UserEntity> mapToEntity = account -> {
+    public static final Function<com.fashion.fashionbe.model.Account, UserEntity> mapToEntity = account -> {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(account.getUserName());
         userEntity.setPassword(account.getPassword());
@@ -51,4 +41,8 @@ public class AccountMapper{
 
         return userEntity;
     };
+
+    private AccountMapper(){
+        // hide constructor
+    }
 }

@@ -1,5 +1,7 @@
 package com.fashion.fashionbe.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,14 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.dto.AccountId;
+import com.fashion.fashionbe.dto.Problem;
+import com.fashion.fashionbe.dto.Role;
 import com.fashion.fashionbe.enumeration.FieldName;
 import com.fashion.fashionbe.exception.ValidationException;
 import com.fashion.fashionbe.factory.mapper.AccountMapper;
 import com.fashion.fashionbe.service.AccountService;
-
-import com.fashion.fashionbe.dto.Account;
-import com.fashion.fashionbe.dto.AccountId;
-import com.fashion.fashionbe.dto.Problem;
 
 /*
     FE ----> DTO(Account) BE (Controller)
@@ -64,13 +66,19 @@ public class AccountController{
 
         isNotEmpty(account.getPassword(), FieldName.password);
 
-        isNotEmpty(account.getPassword(), FieldName.role);
+        isRolesNotEmpty(account.getRoles());
 
     }
 
     private void isNotEmpty(String data, FieldName fieldName) throws ValidationException{
         if(data.length() == 0){
             throw new ValidationException(fieldName.getMessage());
+        }
+    }
+
+    private void isRolesNotEmpty(List<Role> roles) throws ValidationException{
+        if(roles.isEmpty()){
+            throw new ValidationException(FieldName.roles.getMessage());
         }
     }
 
