@@ -17,7 +17,7 @@ import com.fashion.fashionbe.enumeration.AuthorityName;
 @Entity
 @Table(name = "authority")
 @SequenceGenerator(name = "authority_id_generator", sequenceName = "authority_id_seq", allocationSize = 1)
-public class Authority implements GrantedAuthority{
+public class Authority extends BaseEntity implements GrantedAuthority{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "authority_id_generator")
