@@ -1,6 +1,9 @@
 package com.fashion.fashionbe.controller;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,20 @@ public class AccountController{
     @Autowired
     private AccountService accountService;
 
+    private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    private Pattern VALID_PASSWORD_REGEX = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
+
+    private Predicate<String> validateEmailFormat = emailStr -> {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.find();
+    };
+
+    private Predicate<String> validatePassword = pwStr -> {
+        Matcher matcher = VALID_PASSWORD_REGEX.matcher(pwStr);
+        return matcher.find();
+    };
+
     @PostMapping("/authenticate/account")
     private ResponseEntity createAccount(@RequestBody Account accountDto){
 
@@ -68,26 +85,32 @@ public class AccountController{
 
         isRolesNotEmpty(account.getRoles());
 
+        validateUserName(account.getUserName(), FieldName.userName);
+
+        validatePassword(account.getPassword(), FieldName.password);
     }
 
     private void isNotEmpty(String data, FieldName fieldName) throws ValidationException{
         if(data.length() == 0){
-            throw new ValidationException(fieldName.getMessage());
+            throw new ValidationException(fieldName.getEmptyMessage());
         }
     }
 
     private void isRolesNotEmpty(List<Role> roles) throws ValidationException{
         if(roles.isEmpty()){
-            throw new ValidationException(FieldName.roles.getMessage());
+            throw new ValidationException(FieldName.roles.getEmptyMessage());
         }
     }
 
-    private void validateUserName(String userName){
-        //TODO: username must follow email format
+    private void validateUserName(String userName, FieldName fieldName) throws ValidationException{
+        if(!validateEmailFormat.test(userName)){
+            throw new ValidationException(fieldName.userName.getValidationMessage());
+        }
     }
 
-    private void validatePassword(String password){
-        //TODO: password must greater than or equal 8 letters
-        //TODO: password must include UPPER-CASE, NUMBER and Special character
+    private void validatePassword(String password, FieldName fieldName) throws ValidationException{
+        if(!validatePassword.test(password)){
+            throw new ValidationException(fieldName.password.getValidationMessage());
+        }
     }
 }
