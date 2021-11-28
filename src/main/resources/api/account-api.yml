@@ -8,7 +8,7 @@ info:
 servers:
   - url: '{server}'
 paths:
-  /authenticate/account:
+  /no-auth/account:
     post:
       summary: Create an account
       description: The api is used for creating a new account.
@@ -35,6 +35,37 @@ paths:
         default:
           $ref: '#/components/responses/Problem'
 
+  /account/{account-id}:
+    put:
+      summary: Update an account
+      description: The api is used for updating an existing account.
+      operationId: updateAccount
+      tags:
+        - Account
+      requestBody:
+        $ref: '#/components/requestBodies/AccountData'
+      parameters:
+        - $ref: "#/components/parameters/AccountIdPathParam"
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateResult'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '501':
+          $ref: '#/components/responses/Problem'
+        default:
+          $ref: '#/components/responses/Problem'
+
+
+
 components:
 
   headers:
@@ -54,6 +85,13 @@ components:
           schema:
             $ref: '#/components/schemas/Account'
 
+    AccountData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountData'
+
   responses:
 
     AccountId:
@@ -63,12 +101,28 @@ components:
           schema:
             $ref: '#/components/schemas/AccountId'
 
+    UpdateResult:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateResult'
+
     Problem:
       description: A generic problem response.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Problem'
+
+  parameters:
+    AccountIdPathParam:
+      name: account-id
+      in: path
+      description: The identification of an account.
+      required: true
+      schema:
+        $ref: '#/components/schemas/AccountId'
 
   schemas:
 
@@ -133,3 +187,24 @@ components:
           example: 123
           type: integer
           format: int64
+
+    AccountData:
+      description: The data of an account will be updated.
+      required:
+        - roles
+      properties:
+        roles:
+          example: '["ROLE_CUSTOMER","ROLE_EMPLOYEE"]'
+          type : array
+          items :
+            $ref: '#/components/schemas/Role'
+
+    UpdateResult:
+      description: The result of updating.
+      required:
+        - result
+      properties:
+        result:
+          description: The value of result.
+          example: true
+          type: boolean

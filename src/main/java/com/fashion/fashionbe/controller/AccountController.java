@@ -8,16 +8,20 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fashion.fashionbe.dto.Account;
+import com.fashion.fashionbe.dto.AccountData;
 import com.fashion.fashionbe.dto.AccountId;
-import com.fashion.fashionbe.dto.Problem;
 import com.fashion.fashionbe.dto.Role;
 import com.fashion.fashionbe.enumeration.FieldName;
 import com.fashion.fashionbe.exception.ValidationException;
+import com.fashion.fashionbe.factory.CommonUtility;
 import com.fashion.fashionbe.factory.mapper.AccountMapper;
 import com.fashion.fashionbe.service.AccountService;
 
@@ -30,6 +34,30 @@ import com.fashion.fashionbe.service.AccountService;
     FE ----> DTO (target) <---- BE
     Controller ----> Model <----- Service
     Service ----> Entity <------ Repository
+
+    restfull
+
+resources => account
+
+POST   --> create   --> domain/account
+PUT    --> update   --> domain/account/account-id
+DELETE --> delete   --> domain/account/account-id
+GET    --> read     --> domain/account/account-id or domain/accounts
+----
+
+Quan ao (1)
++ Ao so mi (3)
++ Ao thun
+
+Giay Dep (2)
++ Nike
++ Adidas
+
+endpoint regarding product
+POST   --> create   --> domain/category/cat-id/product              ---->  domain/category/1/product
+PUT    --> update   --> domain/category/cat-id/product/pid          ---->  domain/category/1/product/3
+DELETE --> delete   --> domain/category/cat-id/product/pid          ---->  domain/category/1/product/3
+GET    --> read     --> domain/category/cat-id/product/pid or domain/category/cat-id/products ---->  domain/category/1/products
      */
 
 @RestController
@@ -38,9 +66,12 @@ public class AccountController{
     @Autowired
     private AccountService accountService;
 
-    private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    @Autowired
+    private CommonUtility commonUtility;
 
-    private Pattern VALID_PASSWORD_REGEX = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern VALID_PASSWORD_REGEX = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
 
     private Predicate<String> validateEmailFormat = emailStr -> {
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
@@ -52,19 +83,13 @@ public class AccountController{
         return matcher.find();
     };
 
-    @PostMapping("/authenticate/account")
-    private ResponseEntity createAccount(@RequestBody Account accountDto){
+    @PostMapping("/no-auth/account")
+    public ResponseEntity createAccount(@RequestBody Account accountDto){
 
         try{
             validate(accountDto);
         }catch(ValidationException e){
-
-            Problem problem = new Problem();
-            problem.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-            problem.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            problem.setDetail(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(commonUtility.createProblem.apply(e.getMessage()));
         }
 
         com.fashion.fashionbe.model.Account accountModel = AccountMapper.mapToModel.apply(accountDto);
@@ -75,6 +100,22 @@ public class AccountController{
         accountId.setId(id);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(accountId);
+    }
+
+    @PutMapping("/account/{account-id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity updateAccount(@PathVariable("account-id") Long accountId, @RequestBody AccountData accountDataDto){
+
+        // TODO:
+        /*
+        1 - validate data:
+          role should not be empty
+        2 - Mapp list roles of dto -> model
+        3 -> pass to service
+        4 -> return data
+        * */
+
+        return null;
     }
 
     private void validate(Account account) throws ValidationException{
@@ -104,13 +145,13 @@ public class AccountController{
 
     private void validateUserName(String userName, FieldName fieldName) throws ValidationException{
         if(!validateEmailFormat.test(userName)){
-            throw new ValidationException(fieldName.userName.getValidationMessage());
+            throw new ValidationException(fieldName.getValidationMessage());
         }
     }
 
     private void validatePassword(String password, FieldName fieldName) throws ValidationException{
         if(!validatePassword.test(password)){
-            throw new ValidationException(fieldName.password.getValidationMessage());
+            throw new ValidationException(fieldName.getValidationMessage());
         }
     }
 }
