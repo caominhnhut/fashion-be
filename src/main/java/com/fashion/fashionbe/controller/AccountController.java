@@ -8,16 +8,24 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fashion.fashionbe.dto.Account;
 import com.fashion.fashionbe.dto.AccountId;
+import com.fashion.fashionbe.dto.AuthenticatedData;
+import com.fashion.fashionbe.dto.Credential;
 import com.fashion.fashionbe.dto.Problem;
 import com.fashion.fashionbe.dto.Role;
+import com.fashion.fashionbe.entity.UserEntity;
 import com.fashion.fashionbe.enumeration.FieldName;
 import com.fashion.fashionbe.exception.ValidationException;
+import com.fashion.fashionbe.factory.TokenHelper;
 import com.fashion.fashionbe.factory.mapper.AccountMapper;
 import com.fashion.fashionbe.service.AccountService;
 
@@ -37,6 +45,12 @@ public class AccountController{
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenHelper tokenHelper;
 
     private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
@@ -112,5 +126,22 @@ public class AccountController{
         if(!validatePassword.test(password)){
             throw new ValidationException(fieldName.password.getValidationMessage());
         }
+    }
+
+    @PostMapping(value = "/no-auth/login")
+    public ResponseEntity authenticate(@RequestBody Credential credential)
+    {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(credential.getUserName(), credential.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        final String token = tokenHelper.generateToken(user.getUsername());
+
+        AuthenticatedData authenticatedData = new AuthenticatedData();
+        authenticatedData.setToken(token);
+        authenticatedData.setExpiredIn(tokenHelper.getExpiresIn());
+        return ResponseEntity.status(HttpStatus.OK).body(authenticatedData);
     }
 }

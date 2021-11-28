@@ -35,6 +35,32 @@ paths:
         default:
           $ref: '#/components/responses/Problem'
 
+  /no-auth/login:
+    post:
+      summary: Login
+      description: The api is used for user do login.
+      operationId: authenticate
+      tags:
+        - Account
+      requestBody:
+        $ref: '#/components/requestBodies/Credential'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthenticatedData'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '501':
+          $ref: '#/components/responses/Problem'
+        default:
+          $ref: '#/components/responses/Problem'
 components:
 
   headers:
@@ -54,6 +80,14 @@ components:
           schema:
             $ref: '#/components/schemas/Account'
 
+    Credential:
+      description: Username and password.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Credential'
+
   responses:
 
     AccountId:
@@ -62,6 +96,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountId'
+
+    AuthenticatedData:
+      description: Token and expired time of logged in account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticatedData'
 
     Problem:
       description: A generic problem response.
@@ -131,5 +172,35 @@ components:
         id:
           description: The value of identification.
           example: 123
+          type: integer
+          format: int64
+
+    Credential:
+      description: The identification of an account.
+      required:
+        - username
+        - password
+      properties:
+        userName:
+          description: The name of user will be created.
+          example: 'customer@gmail.com'
+          type: string
+        password:
+          description: The password.
+          example: 'abc123'
+          type: string
+
+    AuthenticatedData:
+      required:
+        - token
+        - expiredIn
+      properties:
+        token:
+          description: The name of user will be created.
+          example: 'Ey2jf09u2kjf8u@usdhfih8jiusdhc'
+          type: string
+        expiredIn:
+          description: The expired time.
+          example: '600'
           type: integer
           format: int64
