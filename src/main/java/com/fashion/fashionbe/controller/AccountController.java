@@ -23,6 +23,7 @@ import com.fashion.fashionbe.enumeration.FieldName;
 import com.fashion.fashionbe.exception.ValidationException;
 import com.fashion.fashionbe.factory.CommonUtility;
 import com.fashion.fashionbe.factory.mapper.AccountMapper;
+import com.fashion.fashionbe.model.Authority;
 import com.fashion.fashionbe.service.AccountService;
 
 /*
@@ -63,15 +64,15 @@ GET    --> read     --> domain/category/cat-id/product/pid or domain/category/ca
 @RestController
 public class AccountController{
 
+    private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern VALID_PASSWORD_REGEX = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
+
     @Autowired
     private AccountService accountService;
 
     @Autowired
     private CommonUtility commonUtility;
-
-    private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern VALID_PASSWORD_REGEX = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
 
     private Predicate<String> validateEmailFormat = emailStr -> {
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
@@ -106,16 +107,18 @@ public class AccountController{
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity updateAccount(@PathVariable("account-id") Long accountId, @RequestBody AccountData accountDataDto){
 
-        // TODO:
-        /*
-        1 - validate data:
-          role should not be empty
-        2 - Mapp list roles of dto -> model
-        3 -> pass to service
-        4 -> return data
-        * */
+        try{
+            isRolesNotEmpty(accountDataDto.getRoles());
+        }catch(ValidationException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(commonUtility.createProblem.apply(e.getMessage()));
+        }
 
-        return null;
+        List<Authority> authorities = AccountMapper.mapToAuthorityList.apply(accountDataDto.getRoles());
+        com.fashion.fashionbe.model.Account account = new com.fashion.fashionbe.model.Account();
+        account.setId(accountId);
+        account.getAuthorities().addAll(authorities);
+
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.update(account));
     }
 
     private void validate(Account account) throws ValidationException{

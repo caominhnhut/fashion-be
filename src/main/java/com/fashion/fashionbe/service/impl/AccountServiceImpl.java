@@ -1,9 +1,12 @@
 package com.fashion.fashionbe.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,22 @@ public class AccountServiceImpl implements AccountService{
     @Autowired
     private UserRepository userRepository;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountServiceImpl.class);
+
+    private Function<List<Authority>, List<Authority>> findAuthoritiesByName = authorities -> {
+
+        List<Authority> result = authorities.stream().map(authority -> {
+            List<Authority> subAuthority = authorityRepository.findByName(authority.getName());
+            return subAuthority.get(0);
+        }).collect(Collectors.toList());
+
+        if(result.isEmpty()){
+            throw new IllegalArgumentException(String.format("The role [%s] not found", AuthorityName.ROLE_CUSTOMER.name()));
+        }
+
+        return result;
+    };
+
     @Override
     public Long create(Account account){
 
@@ -45,17 +64,21 @@ public class AccountServiceImpl implements AccountService{
         return createdUser.getId();
     }
 
-    private Function<List<Authority>, List<Authority>> findAuthoritiesByName = authorities -> {
+    @Override
+    public boolean update(Account account){
+        List<Authority> authorities = findAuthoritiesByName.apply(AccountMapper.mapToAuthorityEntity.apply(account.getAuthorities()));
 
-        List<Authority> result = authorities.stream().map(authority -> {
-            List<Authority> subAuthority = authorityRepository.findByName(authority.getName());
-            return subAuthority.get(0);
-        }).collect(Collectors.toList());
-
-        if(result.isEmpty()){
-            throw new IllegalArgumentException(String.format("The role [%s] not found", AuthorityName.ROLE_CUSTOMER.name()));
+        Optional<UserEntity> optionalUserEntity = userRepository.findById(account.getId());
+        if(optionalUserEntity.isPresent()){
+            UserEntity userEntity= optionalUserEntity.get();
+            userEntity.setAuthorities(authorities);
+            try{
+                userRepository.save(userEntity);
+                return true;
+            }catch(Exception e){
+                LOGGER.error(e.getMessage());
+            }
         }
-
-        return result;
-    };
+        return false;
+    }
 }

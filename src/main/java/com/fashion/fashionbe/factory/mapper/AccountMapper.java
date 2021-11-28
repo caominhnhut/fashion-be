@@ -12,7 +12,7 @@ import com.fashion.fashionbe.model.Authority;
 
 public class AccountMapper{
 
-    private static Function<List<Role>, List<Authority>> mapToAuthorityList = roles -> roles.stream().map(role -> {
+    public static Function<List<Role>, List<Authority>> mapToAuthorityList = roles -> roles.stream().map(role -> {
         Authority authority = new Authority();
         authority.setAuthorityName(AuthorityName.valueOf(role.toString()));
         return authority;
@@ -27,7 +27,7 @@ public class AccountMapper{
         return model;
     };
 
-    private static Function<List<Authority>, List<com.fashion.fashionbe.entity.Authority>> mapToAuthorityEntity = authorities -> authorities.stream().map(authority -> {
+    public static Function<List<Authority>, List<com.fashion.fashionbe.entity.Authority>> mapToAuthorityEntity = authorities -> authorities.stream().map(authority -> {
         com.fashion.fashionbe.entity.Authority authorityEntity = new com.fashion.fashionbe.entity.Authority();
         authorityEntity.setName(authority.getAuthorityName());
         return authorityEntity;
