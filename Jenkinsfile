@@ -16,10 +16,8 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh """
-                    chmod +x ./deploy.sh
-                    ./deploy.sh
-                """
+                sh 'sudo docker-compose build'
+                sh 'sudo docker-compose up -d'
             }
         }
     }
