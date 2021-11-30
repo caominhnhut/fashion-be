@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/YourGithubAccount/YourGithubRepository.git'
+                git 'https://github.com/caominhnhut/fashion-be.git'
             }
         }
 
