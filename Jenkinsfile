@@ -1,5 +1,5 @@
 pipeline {
-    agent { node { label 'fashion-be-ci' } }
+    agent any
 
     stages {
 
