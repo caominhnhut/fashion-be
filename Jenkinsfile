@@ -10,15 +10,10 @@ pipeline {
 
         stage("Build") {
             steps {
-                script {
-                    docker.withRegistry('', env.DOCKER_HUB_CREDENTIALS) {
-                        sh """
-                            pwd
-                            ls
-                            docker-compose up -d
-                        """
-                    }
-                }
+                sh """
+                    docker-compose build
+                    docker-compose up -d
+                """
             }
         }
     }
