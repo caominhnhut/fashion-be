@@ -5,7 +5,12 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh "docker-compose up -d"
+                checkout scm
+                sh """
+                pwd
+                ls
+                docker-compose up -d
+                """
             }
         }
     }
