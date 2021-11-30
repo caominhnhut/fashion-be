@@ -8,18 +8,15 @@ pipeline {
 
     stages {
 
-        stage("Build") {
+        stage('Checkout') {
             steps {
-                sh '/usr/local/bin/docker-compose build'
-                sh '/usr/local/bin/docker-compose up -d'
+                git 'https://github.com/YourGithubAccount/YourGithubRepository.git'
             }
         }
-    }
 
-    post {
-        always {
-            script {
-                deleteDir()
+        stage("Build") {
+            steps {
+                sh './deploy.sh'
             }
         }
     }
