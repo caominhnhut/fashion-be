@@ -1,7 +1,7 @@
 pipeline {
     environment {
         DOCKER_HUB_REGISTRY = "nguyencaominhnhut/fashion-be"
-        DOCKER_HUB_CREDENTIALS = 'nguyencaominhnhut'
+        DOCKER_HUB_CREDENTIALS = 'dockerhub_id'
     }
 
     agent any
